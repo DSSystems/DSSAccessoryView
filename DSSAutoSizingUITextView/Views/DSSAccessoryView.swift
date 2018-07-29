@@ -52,7 +52,7 @@ class DSSAccessoryView: UIView, UITextViewDelegate, DSSAccessoryProtocol {
         }
     }
     
-    var leftAccessoryView = UIView() {
+    private var leftAccessoryView = UIView() {
         didSet {
             leftAccessoryViewPaddingAnchor?.constant = 4
             leftAccessoryViewWidthAnchor?.constant = size
