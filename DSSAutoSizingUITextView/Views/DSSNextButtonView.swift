@@ -46,19 +46,46 @@ class DSSNextButtonView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = .clear
         setupNextViewButton()
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTap)))
         isUserInteractionEnabled = true
     }
     
-    @objc private func handleTap() {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let scale: CGFloat = 1.25
         let duration: TimeInterval = 0.25
-        let originalTransform = nextViewButton.transform
-        let transformZoomIn = originalTransform.scaledBy(x: scale, y: scale)
+        originalTransform = nextViewButton.transform
+        guard let transform = originalTransform else { return }
+        let transformZoomIn = transform.scaledBy(x: scale, y: scale)
         UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
             self.nextViewButton.transform = transformZoomIn
+        })
+    }
+    
+    //    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    //        print("something?")
+    //        let duration: TimeInterval = 0.25
+    //        guard let transform = originalTransform else { return }
+    //        UIView.animate(withDuration: duration, delay: duration, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+    //            self.nextViewButton.transform = transform
+    //        }, completion: nil)
+    //    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let duration: TimeInterval = 0.25
+        guard let transform = originalTransform else { return }
+        UIView.animate(withDuration: duration, delay: duration, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+            self.nextViewButton.transform = transform
+        }, completion: nil)
+    }
+    
+    private var originalTransform: CGAffineTransform?
+    
+    @objc private func handleTap() {
+        let duration: TimeInterval = 0.25
+        guard let transform = originalTransform else { return }
+        UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+            self.nextViewButton.transform = transform
         }) { (_) in
             if self.delegate == nil {
                 print("Error delegate not set properly")
@@ -66,10 +93,6 @@ class DSSNextButtonView: UIView {
                 self.delegate?.handleNextButton()
             }
         }
-        
-        UIView.animate(withDuration: duration, delay: duration, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
-            self.nextViewButton.transform = originalTransform
-        }, completion: nil)
     }
     
     required init?(coder aDecoder: NSCoder) {
