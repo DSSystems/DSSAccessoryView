@@ -16,14 +16,14 @@ protocol DSSAccessoryProtocol {
     var size: CGFloat { get }
 }
 
-class DSSAccessoryView: UIView, UITextViewDelegate, DSSAccessoryProtocol {
+class DSSAccessoryView: UIView, UITextViewDelegate, DSSAccessoryProtocol, DSSNextButtonDelegate {
     
     var size: CGFloat = 36
     var delegate: DSSDSSAccessoryViewDelegate?
     private var stackView: UIStackView?
     private var stackViewWidthAnchor: NSLayoutConstraint?
     private var stackViewHeightAnchor: NSLayoutConstraint?
-    private var showAccessoriesButton: UIButton?
+    private var showAccessoriesButton: DSSNextButtonView?
     private var showAccessoryButtonWidthAnchor: NSLayoutConstraint?
     private var showAccessoryButtonHeightAnchor: NSLayoutConstraint?
     private var blurEffectView: UIVisualEffectView?
@@ -125,8 +125,7 @@ extension DSSAccessoryView {
         sendButton.layer.borderWidth = 1
         sendButton.backgroundColor = .clear
         sendButton.setTitleColor(tintStyleColor, for: .normal)
-        showAccessoriesButton?.backgroundColor = tintStyleColor
-        showAccessoriesButton?.layer.borderWidth = 1
+        showAccessoriesButton?.lightMode = true
         blurEffectView?.removeFromSuperview()
         backgroundColor = UIColor(white: 1, alpha: 1)
     }
@@ -178,9 +177,7 @@ extension DSSAccessoryView {
         sendButton.layer.borderWidth = 0
         sendButton.backgroundColor = tintStyleColor
         sendButton.setTitleColor(.white, for: .normal)
-        showAccessoriesButton?.backgroundColor = tintStyleColor
-        showAccessoriesButton?.layer.borderColor = borderColor.cgColor
-        showAccessoriesButton?.layer.borderWidth = 0
+        showAccessoriesButton?.lightMode = false
         addSubview(blurEffectView!)
         sendSubview(toBack: blurEffectView!)
     }
@@ -189,13 +186,11 @@ extension DSSAccessoryView {
         if blurryBackground {
             self.sendButton.backgroundColor = tintStyleColor
             self.sendButton.setTitleColor(.white, for: .normal)
-            self.showAccessoriesButton?.backgroundColor = tintStyleColor
-            self.showAccessoriesButton?.setTitleColor(.white, for: .normal)
+            self.showAccessoriesButton?.lightMode = true
         } else {
             self.sendButton.backgroundColor = .clear
             self.sendButton.setTitleColor(tintStyleColor, for: .normal)
-            self.showAccessoriesButton?.backgroundColor = .clear
-            self.showAccessoriesButton?.setTitleColor(tintStyleColor, for: .normal)
+            self.showAccessoriesButton?.lightMode = false
         }
     }
     
@@ -211,22 +206,16 @@ extension DSSAccessoryView {
         stackView.spacing = 4
         
         if numberOfViews >= 3 {
-            let showAccessoriesButton = UIButton(type: .system)
-            showAccessoriesButton.setTitle(">", for: .normal)
-            showAccessoriesButton.setTitle("<", for: .highlighted)
-            showAccessoriesButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: size / 2)
-            showAccessoriesButton.layer.cornerRadius = 0.7 * size / 2
-            showAccessoriesButton.layer.borderColor = borderColor.cgColor
+            let showAccessoriesButton = DSSNextButtonView()
+            showAccessoriesButton.layer.cornerRadius = size / 2
             showAccessoriesButton.layer.masksToBounds = true
-            
+            showAccessoriesButton.primaryColor = tintStyleColor
+            showAccessoriesButton.secondaryColor = borderColor
+            showAccessoriesButton.delegate = self
             if blurryBackground {
-                showAccessoriesButton.backgroundColor = tintStyleColor
-                showAccessoriesButton.layer.borderWidth = 0
-                showAccessoriesButton.tintColor = .white
+                showAccessoriesButton.lightMode = false
             } else {
-                showAccessoriesButton.backgroundColor = .clear
-                showAccessoriesButton.layer.borderWidth = 1
-                showAccessoriesButton.tintColor = tintStyleColor
+                showAccessoriesButton.lightMode = true
             }
             
             leftAccessoryView.addSubview(showAccessoriesButton)
@@ -238,7 +227,6 @@ extension DSSAccessoryView {
                 showAccessoriesButton.centerXAnchor.constraint(equalTo: leftAccessoryView.centerXAnchor),
                 showAccessoriesButton.centerYAnchor.constraint(equalTo: leftAccessoryView.centerYAnchor)
                 ])
-            showAccessoriesButton.addTarget(self, action: #selector(handleShowAccesories), for: .touchUpInside)
             self.showAccessoriesButton = showAccessoriesButton
             
             leftAccessoryView.addSubview(stackView)
@@ -267,8 +255,8 @@ extension DSSAccessoryView {
     
     func hideAccessories() {
         if accessories.count < 3 { return }
-        showAccessoryButtonWidthAnchor?.constant = 0.7 * size
-        showAccessoryButtonHeightAnchor?.constant = 0.7 * size
+        showAccessoryButtonWidthAnchor?.constant = size
+        showAccessoryButtonHeightAnchor?.constant = size
         stackViewHeightAnchor?.constant = size
         stackViewWidthAnchor?.constant = 0
         leftAccessoryViewWidthAnchor?.constant = size
@@ -297,6 +285,10 @@ extension DSSAccessoryView {
         UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
             self.layoutIfNeeded()
         }, completion: nil)
+    }
+    
+    func handleNextButton() {
+        handleShowAccesories()
     }
     
     @objc private func handleSend(button: UIButton) {

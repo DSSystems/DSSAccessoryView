@@ -15,7 +15,7 @@ let myChatAccessoryView = DSSAccessoryView(size: myAccessorySize)
 
 this last constructor takes an additional value that determines the height of the input text and buttons. The default height is h = 36px, also the font size is determined by this height as h/2 - 2.
 
-To add this accessory to your (UICollectionView) chat view controller, you need to set myaChatAccessoryView as the accessory view that UICollectionView already have, i.e.,
+To add this accessory to your (UICollectionView) chat view controller, you need to set myChatAccessoryView as the accessory view that UICollectionView already have, i.e.,
 
 override var inputAccessoryView: UIView? {
         return myChatAccessoryView
@@ -38,7 +38,9 @@ where textView is a reference to the input text view.
 The following properties can be modified to customize the accessory
 
 borderColor: UIColor // secondary color (UIColor.customGray as default, be careful, this color comes from an extension of UIColor)
+
 blurryBackground: Bool // to add a blurry effect to the accessory background (without blurry effect the backgraund color is UIColor.white by default)
+
 tintStyleColor: UIColor // main color of the accessory (UIColor.customTintColor as default, be careful ...)
 
 
